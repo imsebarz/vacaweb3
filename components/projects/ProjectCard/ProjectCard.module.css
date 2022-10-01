@@ -5,6 +5,7 @@
     height: 14rem;
     padding: 1.2rem;
     background-color: var(--grey-color-light);
+    color: black;
     border-radius: 1.5rem;
     margin-top: 2.5rem;
     cursor: pointer;
