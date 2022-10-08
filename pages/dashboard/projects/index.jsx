@@ -7,11 +7,8 @@ import { useEffect, useState } from "react";
 import projectMakerABI from "../../../utils/projectMakerABI.json";
 import {
   useAccount,
-  useConnect,
-  useContract,
   useContractRead,
   useContractWrite,
-  useNetwork,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
@@ -43,11 +40,13 @@ const DashBoard = ({ projects }) => {
 
   let count = parseInt(data?._hex)
 
+  let fundraisingoal = 200;
+
   const { config } = usePrepareContractWrite({
     addressOrName: CONTRACT_ADDRESS,
     contractInterface: projectMakerABI,
     functionName: 'makeProyecto',
-    args: [200, user, user, 2000]
+    args: [fundraisingoal, user, user, 2000]
   })
   
   const { write } = useContractWrite(config)
