@@ -4,7 +4,7 @@ import ProjectCard from "../../../components/projects/ProjectCard";
 import Loading from "../../../components/Loading";
 import { getProjects } from "../../../utils/services";
 import { useEffect, useState } from "react";
-import ABI from "../../../utils/ABI.json";
+import projectMakerABI from "../../../utils/projectMakerABI.json";
 import {
   useAccount,
   useConnect,
@@ -12,6 +12,7 @@ import {
   useContractRead,
   useContractWrite,
   useNetwork,
+  usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
 import { ethers } from "ethers";
@@ -30,42 +31,65 @@ export async function getStaticProps(context) {
 }
 
 const DashBoard = ({ projects }) => {
-  const CONTRACT_ADDRESS = "0xAfDdCE9E0cA4f63dD32e7733Aead3573C9721aF4";
+  const CONTRACT_ADDRESS = "0x51fCd56Ae21B2B60A3757B37E5a8F2B17F54F4Fc";
+  const { address: user } = useAccount()
 
-  const { data: totalSupplyData } = useContractRead({
+  const { data } = useContractRead({
     addressOrName: CONTRACT_ADDRESS,
-    contractInterface: ABI,
-    functionName: "message",
+    contractInterface: projectMakerABI,
+    functionName: "getProjectsCount",
     watch: true,
   });
 
+  let count = parseInt(data?._hex)
+
+  const { config } = usePrepareContractWrite({
+    addressOrName: CONTRACT_ADDRESS,
+    contractInterface: projectMakerABI,
+    functionName: 'makeProyecto',
+    args: [200, user, user, 2000]
+  })
+  
+  const { write } = useContractWrite(config)
+  
+  
+
   useEffect(() => {
-    if (totalSupplyData) {
+    if (data) {
       console.log(
-        "🚀 ~ file: index.jsx ~ line 45 ~ useEffect ~ totalSupplyData",
-        totalSupplyData
+        "🚀 ~ file: index.jsx ~ line 45 ~ useEffect ~ data",
+        data
       );
     }
-  }, [totalSupplyData]);
+  }, [data]);
+
   const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 300);
   }, []);
+  
 
   return (
     <MainLayout>
       <h1 className="text-2xl " style={{ color: "black" }}>
         Financia la educación de nuevo talento
       </h1>
+       <button  disabled={!write} onClick={() => write?.()}>Crear Proyecto</button>
+      {/* <button disabled={!write} onClick={() => write?.()}>Obtener cantidad de proyectos</button>  */}
+      
       {isLoading && <Loading />}
       {!isLoading && (
+        <>
+        <h1 >Tenemos {count} proyectos</h1>
         <section>
-          {projects.map((project, key) => (
+          {projects.slice(0,count).map((project, key) => (
             <ProjectCard key={key} {...project} />
-          ))}
+            ))}
         </section>
+            </>
       )}
     </MainLayout>
   );
